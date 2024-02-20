@@ -6,6 +6,8 @@ from decouple import config
 import datetime as dt
 from consultas_sql import Mov_dia
 import warnings
+import altair as alt
+from streamlit_autorefresh import st_autorefresh
 
 warnings.filterwarnings('ignore')
 
@@ -20,6 +22,8 @@ st.set_page_config(
     layout="wide",
     page_icon= "Logo_DI.png"
 )
+alt.themes.enable("dark")
+
 
 
 def Connect():
@@ -32,6 +36,7 @@ def Connect():
 
   return conn
 
+st_autorefresh(interval=120000, key="f5")
 @st.cache_data
 def consulta():
     df= pd.read_sql(Mov_dia, Connect())
@@ -116,37 +121,42 @@ def OS_Produzidas():
 
     return df
 
+df_OSAtrasadas = OS_atrasadas() 
+df_Producao = OS_Produzidas()
+df_Etapas = agrupamento_etapa()
+
+unique_cod_etapas = df_Etapas['COD_ETAPA'].unique()
 
 css = """
 <style>
 * {
   margin: 0;  
   padding: 0px;
-  box-sizing: border-box;
-  
+
 }
+.block-container { 
+    display: block;
+    justify-content: center;
+    #padding: 0px;
+    }
 
 [data-testid="StyledLinkIconContainer"]{
-    font-size: 4.25em; 
+    font-size: 3em; 
     #margin-left: 0.5em;
     text-align: center;
     font-family: 'Segoe UI';
     color: #FFFFFF;
+    padding: 0px;
 }
 
-[data-testid="stMetric"]{
-    margin-left: 4em;
-    font-family: 'Segoe UI';
-    color: #FFFFFF;
-    
+[data-testid="stHorizontalBlock"]{
+    position: flex;
+
 }
 
-[data-testid="stMetricContainer"] {
-    p{
-        font-size: 2.75em !important;
-    }
+div[data-testid="stMetricLabel"] {
+    font-size: 2.75em; 
 }
-
 [data-testid="stMetricValue"] {
     font-size: 2.75em; 
 }
@@ -156,29 +166,21 @@ css = """
 }
 
 [data-testid="stArrowVegaLiteChart"]{
-    margin-left: 4em;
-    width: 100px;
-    height: 200px;
+    # margin-left: 4em;
+    # width: 100px;
+    # height: 200px;
 }
 
-[data-testid="stDataFrame"]{
-    margin-left: 4em;
-}
 
-.block-container { padding: 0px !important; }
+# 
 </style>
 """
 
 st.markdown(css, unsafe_allow_html=True)
-st.title('Painel de produção')
+st.title("Painel de produção")
 
 metrics_per_row = 5
 
-df_OSAtrasadas = OS_atrasadas() 
-df_Producao = OS_Produzidas()
-df_Etapas = agrupamento_etapa()
-
-unique_cod_etapas = df_Etapas['COD_ETAPA'].unique()
 
 for i in range(0, len(unique_cod_etapas), metrics_per_row):
 
@@ -194,18 +196,20 @@ for i in range(0, len(unique_cod_etapas), metrics_per_row):
             valor_etapa = df_Etapas.loc[df_Etapas['COD_ETAPA'] == cod_etapa, 'LOJA'].iloc[0]
             valor_today = df_Etapas.loc[df_Etapas['COD_ETAPA'] == cod_etapa, 'Mov_at'].iloc[0]
             
-            
             cols[j].metric(label=nome_etapa, value=valor_today, delta=valor_etapa, delta_color="off")
 
+
+
 col1,col2  = st.columns(2)
+
 col1.bar_chart(
     df_Producao,
     x= 'Dia',
     y= 'QTD OS',
     width= 500,
     height= 450,
-    color = ['#c4161c']
-
+    color = ['#c4161c'],
+    use_container_width = True
     )
 
 col2.dataframe(
@@ -217,5 +221,7 @@ col2.dataframe(
             format="%d",
         ),
     },
-    
+    width= 800,
+    height= 400,
     )
+
