@@ -47,8 +47,8 @@ select
         when 12 then 'O.S. em tratamento externo'
         when 13 then 'O.S. devolvida pelo cliente'
         when 14 then 'Translado loja (pós venda) -> estoque'
-        when 15 then 'Aguardando armação para montagem'
-        when 16 then 'Armação enviada pela loja para montagem'
+        when 15 then 'Aguardando armação'
+        when 16 then 'Armação enviada'
         when 17 then 'Serviço forçar finalização'
         when 18 then 'Devolver para o laboratório'
         when 19 then 'Translado laboratório -> estoque'
@@ -70,7 +70,7 @@ left join transacao
 
 where
     (ordemservicocaixa.cod_empresa is not null and  ordemservicocaixa.reparo = 'F')
-    --and cast(ordemservicocaixalog.datahoraentrada as date) = '{today}'
+    --and cast(ordemservicocaixalog.datahoraentrada as date) 
 """
 
 
