@@ -1,15 +1,78 @@
 import streamlit as st
 from datam import unique_cod_etapas, df_Etapas, df_Producao, df_OSAtrasadas
+ 
+css = """
+<style>
+* {
+margin: 0;  
+padding: 0px;
 
+}
+.block-container { 
+    display: block;
+    justify-content: center;
+    padding: 0px;
+    }
+
+[data-testid="StyledLinkIconContainer"]{
+    font-size: 3em; 
+    #margin-left: 0.5em;
+    text-align: center;
+    font-family: 'Segoe UI';
+    color: #FFFFFF;
+    padding: 0px;
+}
+
+[data-testid="stMetric"] {
+    display: grid;
+    place-items: center;
+}
+  
+[data-testid="stMetricValue"] {
+    font-size: 2.75em; 
+}
+
+[data-testid="stMetricDelta"]{
+    font-size: 1.75em; 
+}
+
+[data-testid="stMetricLabel"]{   
+    p{
+        font-size: 0.25em; 
+    }
+}
+
+.main .block-container {
+    max-width: 95%;
+        
+}
+
+[data-testid="stMetricLabel"] {
+    font-size: 100px;
+}
+
+[data-testid="stMetricDelta"] svg {
+        display: none;
+    }
+
+
+[data-testid="stFullScreenFrame"]{
+    display: grid;
+    place-items: center;
+   }
+
+
+</style>
+"""
+def apply_css(css):
+   st.markdown(css, unsafe_allow_html=True)
 
 def app():
-
-    
+      
+    apply_css(css)
     st.title("Painel de produção")
-
     
     metrics_per_row = 5
-
 
     for i in range(0, len(unique_cod_etapas), metrics_per_row):
 

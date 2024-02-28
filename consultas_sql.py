@@ -70,7 +70,7 @@ left join transacao
 
 where
     (ordemservicocaixa.cod_empresa is not null and  ordemservicocaixa.reparo = 'F')
-    --and cast(ordemservicocaixalog.datahoraentrada as date) 
+    and ordemservicocaixalog.observacao not like ('%Cancelamento%')
 """
 
 

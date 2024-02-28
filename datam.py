@@ -82,7 +82,7 @@ def agrupamento_etapa():
 def OS_atrasadas():
     df = consulta()
     #pegando tudo que nao é Translado laboratório -> loja
-    df = df[df['COD_ETAPA']!= 4] 
+    df =  df[~df['COD_ETAPA'].isin([4, 20, 7])] 
     
     df['PREVISAO'] = pd.to_datetime(df['PREVISAO'])
     df['Ultima mov'] = pd.to_datetime(df['Ultima mov'])
@@ -134,7 +134,3 @@ Os_Semana = df_Producao[df_Producao['Dia'].isin(days_only)]['QTD OS'].sum()
 OS_Dia = df_Producao[df_Producao['Dia']==day_today]['QTD OS'].sum()
 Os_Mes = df_Producao['QTD OS'].sum()
 Ag_montagem = df_Etapas[df_Etapas['COD_ETAPA']==16]['LOJA'].sum()
-
-
-
-
