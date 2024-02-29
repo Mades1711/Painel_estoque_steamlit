@@ -16,16 +16,13 @@ padding: 0px;
     }
 
 [data-testid="StyledLinkIconContainer"]{
-    font-size: 3em; 
-    #margin-left: 0.5em;
+    font-size: 2.8em; 
     text-align: center;
-    font-family: 'Segoe UI';
-    color: #FFFFFF;
     padding: 0px;
 }
 
 [data-testid="stMetric"] {
-    margin-top: 3em;
+    margin-top: 2em;
     display: grid;
     place-items: center;
 }
@@ -40,7 +37,7 @@ padding: 0px;
 
 [data-testid="stMetricLabel"]{   
     p{
-        font-size: 0.35em; 
+        font-size: 2em; 
     }
 }
 
@@ -49,9 +46,6 @@ padding: 0px;
         
 }
 
-[data-testid="stMetricLabel"] {
-    font-size: 100px;
-}
 
 [data-testid="stMetricDelta"] svg {
         display: none;
@@ -61,14 +55,9 @@ padding: 0px;
 [data-testid="stFullScreenFrame"]{
     display: grid;
     place-items: center;
-    margin-top: 3em
-   }
+    margin-top: 1.5em
 
-[data-testid="stDataframe"]{
-   th, td {
-        font-size: 2em
    }
-}
 
 
 </style>
@@ -79,7 +68,10 @@ def apply_css(css):
 def app():
    
    apply_css(css)
+
    st.title("Painel de produção")
+
+
    col1, col2, col3, col4  = st.columns(4)
 
    col1.metric(label='OS do dia', value=OS_Dia, delta=None)
@@ -100,5 +92,5 @@ def app():
       ),
    },
    width= 900,
-   height= 400,
+   height= 260,
    )

@@ -1,5 +1,7 @@
 import streamlit as st
-from datam import unique_cod_etapas, df_Etapas, df_Producao, df_OSAtrasadas
+import time
+import datetime
+from datam import today,unique_cod_etapas, df_Etapas, df_Producao, df_OSAtrasadas, consulta
  
 css = """
 <style>
@@ -15,11 +17,8 @@ padding: 0px;
     }
 
 [data-testid="StyledLinkIconContainer"]{
-    font-size: 3em; 
-    #margin-left: 0.5em;
+    font-size: 2.4em; 
     text-align: center;
-    font-family: 'Segoe UI';
-    color: #FFFFFF;
     padding: 0px;
 }
 
@@ -29,16 +28,16 @@ padding: 0px;
 }
   
 [data-testid="stMetricValue"] {
-    font-size: 2.75em; 
+    font-size: 2.3em; 
 }
 
 [data-testid="stMetricDelta"]{
-    font-size: 1.75em; 
+    font-size: 1.35em; 
 }
 
 [data-testid="stMetricLabel"]{   
     p{
-        font-size: 0.25em; 
+        font-size: 1.2em; 
     }
 }
 
@@ -47,9 +46,6 @@ padding: 0px;
         
 }
 
-[data-testid="stMetricLabel"] {
-    font-size: 100px;
-}
 
 [data-testid="stMetricDelta"] svg {
         display: none;
@@ -68,10 +64,13 @@ def apply_css(css):
    st.markdown(css, unsafe_allow_html=True)
 
 def app():
-      
+    
     apply_css(css)
     st.title("Painel de produção")
+
+    st.write(today) 
     
+
     metrics_per_row = 5
 
     for i in range(0, len(unique_cod_etapas), metrics_per_row):
@@ -98,8 +97,8 @@ def app():
         df_Producao,
         x= 'Dia',
         y= 'QTD OS',
-        width= 500,
-        height= 450,
+        width= 450,
+        height= 270,
         color = ['#c4161c'],
         use_container_width = True
         )
@@ -113,6 +112,6 @@ def app():
                 format="%d",
             ),
         },
-        width= 800,
-        height= 400,
+        width= 850,
+        height= 250,
         )

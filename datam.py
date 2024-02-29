@@ -4,6 +4,8 @@ import pandas as pd
 import warnings
 from decouple import config
 import datetime as dt
+
+import time
 from consultas_sql import Mov_dia
 from streamlit_autorefresh import st_autorefresh
 
@@ -35,16 +37,16 @@ def Connect():
 
   return conn
 
-st_autorefresh(interval=120000, key="f5")
-@st.cache_data
+
+@st.cache_data(ttl=60,show_spinner="Atualizando os dados...")
 def consulta():
     df= pd.read_sql(Mov_dia, Connect())
     return df
 
-def agrupamento_etapa():
-    df= consulta()
-    
+df= consulta()
 
+
+def agrupamento_etapa(df):
     df_prod = df[df['COD_ETAPA']== 4] 
     df_prod['Ultima mov'] = pd.to_datetime(df_prod['Ultima mov'])   
     df_prod['Mov_at'] = max_dt
@@ -79,8 +81,7 @@ def agrupamento_etapa():
     return df
 
 
-def OS_atrasadas():
-    df = consulta()
+def OS_atrasadas(df):
     #pegando tudo que nao é Translado laboratório -> loja
     df =  df[~df['COD_ETAPA'].isin([4, 20, 7])] 
     
@@ -107,8 +108,8 @@ def OS_atrasadas():
     return df
 
 
-def OS_Produzidas():    
-    df = consulta() 
+def OS_Produzidas(df):    
+
     #pegando tudo que é Translado laboratório -> loja
     df = df[df['COD_ETAPA']== 4]
     df = df.drop(columns=['PREVISAO','COD_ETAPA'])
@@ -120,15 +121,11 @@ def OS_Produzidas():
 
     return df
 
-df_OSAtrasadas = OS_atrasadas() 
-df_Producao = OS_Produzidas()
-df_Etapas = agrupamento_etapa()
-
-
-
+df_OSAtrasadas = OS_atrasadas(df) 
+df_Producao = OS_Produzidas(df)
+df_Etapas = agrupamento_etapa(df)
 
 unique_cod_etapas = df_Etapas['COD_ETAPA'].unique()
-
 
 Os_Semana = df_Producao[df_Producao['Dia'].isin(days_only)]['QTD OS'].sum()
 OS_Dia = df_Producao[df_Producao['Dia']==day_today]['QTD OS'].sum()

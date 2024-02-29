@@ -1,4 +1,5 @@
 import streamlit as st
+import time
 from streamlit_option_menu import option_menu
 from menu_pages import Estoque, Laboratorio
 
@@ -7,6 +8,9 @@ from menu_pages import Estoque, Laboratorio
 #     layout="wide",
 #     page_icon= "Logo_DI.png"
 # )
+
+
+
 
 class Multiapp:
     
