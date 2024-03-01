@@ -1,4 +1,5 @@
 import streamlit as st
+import altair as alt
 import time
 import datetime
 from datam import today,unique_cod_etapas, df_Etapas, df_Producao, df_OSAtrasadas, consulta
@@ -89,19 +90,17 @@ def app():
                 
                 cols[j].metric(label=nome_etapa, value=valor_today, delta=valor_etapa, delta_color="off")
 
-
-
     col1,col2  = st.columns(2)
 
-    col1.bar_chart(
-        df_Producao,
-        x= 'Dia',
-        y= 'QTD OS',
-        width= 450,
-        height= 270,
-        color = ['#c4161c'],
-        use_container_width = True
-        )
+    col1.altair_chart(
+        alt.Chart(df_Producao).mark_bar().encode(
+            x=alt.X('Dia', sort=None, title="Dia"),
+            y=alt.Y('QTD OS', title="QTD OS"),
+            color=alt.Color('QTD OS', scale=alt.Scale(scheme='reds'),legend=None)
+        ), 
+        use_container_width=True,    
+    )
+
 
     col2.dataframe(
         data=df_OSAtrasadas.drop(columns=['COD_ETAPA']),

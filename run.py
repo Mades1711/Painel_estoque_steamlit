@@ -10,8 +10,6 @@ from menu_pages import Estoque, Laboratorio
 # )
 
 
-
-
 class Multiapp:
     
     def __init__(self):
@@ -34,3 +32,5 @@ class Multiapp:
         if app == 'Laboratorio':
             Laboratorio.app()
     run()
+
+

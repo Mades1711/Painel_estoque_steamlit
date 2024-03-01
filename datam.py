@@ -4,19 +4,23 @@ import pandas as pd
 import warnings
 from decouple import config
 import datetime as dt
-
+import locale
 import time
 from consultas_sql import Mov_dia
 from streamlit_autorefresh import st_autorefresh
 
 warnings.filterwarnings('ignore')
 
+locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
 #Manipulação temporal
 today = dt.datetime.today()
 max_dt = today.date()
 next_month = today.replace(day=28) + dt.timedelta(days=4)
+
 first_day_month = (today.replace(day=1))
 final_month = (next_month - dt.timedelta(days=next_month.day))
+
+days_pass = (today - dt.timedelta(days=31) )
 
 start_of_week = today - dt.timedelta(days=today.weekday())
 
@@ -48,13 +52,12 @@ df= consulta()
 
 def agrupamento_etapa(df):
     df_prod = df[df['COD_ETAPA']== 4] 
-    df_prod['Ultima mov'] = pd.to_datetime(df_prod['Ultima mov'])   
+    df_prod['Ultima mov'] = pd.to_datetime(df_prod['Ultima mov']) 
+    df_prod['Ultima mov'] = df_prod['Ultima mov'].dt.date
     df_prod['Mov_at'] = max_dt
     df_prod['Mov_at'] = df_prod['Mov_at'] == df_prod['Ultima mov']
-    df_prod = df_prod[df_prod['Ultima mov'].between(first_day_month, final_month)]
-    #df_prod = df_prod[df_prod['Mov_at']==True]
+    df_prod = df_prod[df_prod['Ultima mov'].between(first_day_month.date(), today.date())]   
     df_prod= df_prod.groupby(['COD_ETAPA','ETAPA']).agg({'LOJA':'count','Mov_at':'sum'}).reset_index()
-
     df = df[df['COD_ETAPA']!= 4] 
     df['Ultima mov'] = pd.to_datetime(df['Ultima mov'])
     df['Ultima mov'] = df['Ultima mov'].dt.date
@@ -83,7 +86,7 @@ def agrupamento_etapa(df):
 
 def OS_atrasadas(df):
     #pegando tudo que nao é Translado laboratório -> loja
-    df =  df[~df['COD_ETAPA'].isin([4, 20, 7])] 
+    df =  df[~df['COD_ETAPA'].isin([4, 20, 7,14])] 
     
     df['PREVISAO'] = pd.to_datetime(df['PREVISAO'])
     df['Ultima mov'] = pd.to_datetime(df['Ultima mov'])
@@ -114,16 +117,19 @@ def OS_Produzidas(df):
     df = df[df['COD_ETAPA']== 4]
     df = df.drop(columns=['PREVISAO','COD_ETAPA'])
     df['Ultima mov'] = pd.to_datetime(df['Ultima mov'])
-    df = df[df['Ultima mov'].between(first_day_month, final_month)]    
-    df['Ultima mov']= df['Ultima mov'].dt.strftime('%d')    
-    df= df.groupby(['Ultima mov']).agg({'LOJA':'count'}).reset_index()
-    df = df.rename(columns={'Ultima mov' : 'Dia', 'LOJA' : 'QTD OS'})
-
+    df = df[df['Ultima mov'].between(days_pass, today)]    
+    df['Dia']= df['Ultima mov'].dt.strftime('%b %d')
+    df= df.groupby(['Dia','Ultima mov']).agg({'LOJA':'count'}).reset_index()
+    df = df.reset_index()
+    df = df.rename(columns={ 'LOJA' : 'QTD OS'}).sort_values(by='Ultima mov',ascending=True)
+    df = df.set_index('Ultima mov').reset_index()
+    df = df.drop(columns='index')
     return df
 
 df_OSAtrasadas = OS_atrasadas(df) 
 df_Producao = OS_Produzidas(df)
 df_Etapas = agrupamento_etapa(df)
+
 
 unique_cod_etapas = df_Etapas['COD_ETAPA'].unique()
 
