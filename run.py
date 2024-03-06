@@ -1,36 +1,18 @@
 import streamlit as st
-import time
-from streamlit_option_menu import option_menu
-from menu_pages import Estoque, Laboratorio
-
-# st.set_page_config(
-#     page_title="Painel de produção",
-#     layout="wide",
-#     page_icon= "Logo_DI.png"
-# )
+from streamlit_autorefresh import st_autorefresh
+from st_pages import Page, show_pages, add_page_title
 
 
-class Multiapp:
-    
-    def __init__(self):
-        self.apps = []
-    def add_app(self, title, function):
-        self.apps.append({
-            "title": title,
-            "function": function
-        })
-    def run():
-        
-        with st.sidebar: 
-            app = option_menu(
-                menu_title='Paineis',
-                options=['Estoque', 'Laboratorio'],
-                default_index= 0,
-            )
-        if app == 'Estoque':            
-            Estoque.app()
-        if app == 'Laboratorio':
-            Laboratorio.app()
-    run()
+refresh_count = st_autorefresh(interval=10 * 60 * 1000, key="mainrefresh", limit=None)
+
+# Optional -- adds the title and icon to the current page
+add_page_title()
+
+show_pages(
+    [
+        Page("./menu_pages/Estoque.py", "Estoque", "📦"),
+        Page("./menu_pages/Laboratorio.py", "Laboratório", "👓"),       
+    ]
+)
 
 

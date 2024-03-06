@@ -1,9 +1,10 @@
 import streamlit as st
 import altair as alt
-import time
-import datetime
-from datam import today,unique_cod_etapas, df_Etapas, df_Producao, df_OSAtrasadas, consulta
- 
+from datam import consulta, agrupamento_etapa, OS_atrasadas, OS_Produzidas
+import datetime as dt
+
+
+
 css = """
 <style>
 * {
@@ -59,18 +60,37 @@ padding: 0px;
    }
 
 
+
+
 </style>
 """
 def apply_css(css):
    st.markdown(css, unsafe_allow_html=True)
 
 def app():
-    
+
+    st.set_page_config(
+        page_title="Painel de produção Estoque",
+        page_icon= "Logo_DI.png",
+        initial_sidebar_state='collapsed'
+    )
+    #Manipulação temporal
+    today = dt.datetime.today()
+    max_dt = today.date()
+    first_day_month = (today.replace(day=1)).date()
+    days_pass = (today - dt.timedelta(days=31) )
+
+    #consultas
+    df= consulta()
+    df_Etapas = agrupamento_etapa(df,first_day_month,today,max_dt)
+    df_OSAtrasadas = OS_atrasadas(df)
+    df_Producao = OS_Produzidas(df,days_pass,today)
+
+    #variaveis
+    unique_cod_etapas = df_Etapas['COD_ETAPA'].unique()
+
     apply_css(css)
     st.title("Painel de produção")
-
-    st.write(today) 
-    
 
     metrics_per_row = 5
 
@@ -114,3 +134,5 @@ def app():
         width= 850,
         height= 250,
         )
+    
+app()

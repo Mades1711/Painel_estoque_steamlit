@@ -34,7 +34,7 @@ select
     case ordemservicocaixalog.cod_etapa
         when 00 then 'Etapa inicial'
         when 01 then 'Ordem de serviço no estoque'
-        when 02 then 'Translado estoque -> laboratório'
+        when 02 then 'Em montagem'
         when 03 then 'Ordem de serviço no laboratório'
         when 04 then 'Translado laboratório -> loja'
         when 05 then 'Ordem de serviço recebida do laboratório'

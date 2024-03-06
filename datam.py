@@ -5,19 +5,20 @@ import warnings
 from decouple import config
 import datetime as dt
 import locale
-import time
 from consultas_sql import Mov_dia
-from streamlit_autorefresh import st_autorefresh
+
 
 warnings.filterwarnings('ignore')
 
 locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+
 #Manipulação temporal
+
 today = dt.datetime.today()
 max_dt = today.date()
 next_month = today.replace(day=28) + dt.timedelta(days=4)
 
-first_day_month = (today.replace(day=1))
+first_day_month = (today.replace(day=1)).date()
 final_month = (next_month - dt.timedelta(days=next_month.day))
 
 days_pass = (today - dt.timedelta(days=31) )
@@ -41,22 +42,21 @@ def Connect():
 
   return conn
 
-
-@st.cache_data(ttl=60,show_spinner="Atualizando os dados...")
+@st.cache_data(show_spinner="Atualizando os dados...")
 def consulta():
     df= pd.read_sql(Mov_dia, Connect())
     return df
 
-df= consulta()
 
 
-def agrupamento_etapa(df):
+@st.cache_data()
+def agrupamento_etapa(df, first_day_month, today, max_dt):
     df_prod = df[df['COD_ETAPA']== 4] 
     df_prod['Ultima mov'] = pd.to_datetime(df_prod['Ultima mov']) 
     df_prod['Ultima mov'] = df_prod['Ultima mov'].dt.date
     df_prod['Mov_at'] = max_dt
     df_prod['Mov_at'] = df_prod['Mov_at'] == df_prod['Ultima mov']
-    df_prod = df_prod[df_prod['Ultima mov'].between(first_day_month.date(), today.date())]   
+    df_prod = df_prod[df_prod['Ultima mov'].between(first_day_month, today.date())]   
     df_prod= df_prod.groupby(['COD_ETAPA','ETAPA']).agg({'LOJA':'count','Mov_at':'sum'}).reset_index()
     df = df[df['COD_ETAPA']!= 4] 
     df['Ultima mov'] = pd.to_datetime(df['Ultima mov'])
@@ -68,7 +68,7 @@ def agrupamento_etapa(df):
     soma_OS_td = df['Mov_at'].sum()
 
     df = pd.concat([df, df_prod], ignore_index= True) 
-    df = df.query('COD_ETAPA in (1,2,3,4,10,15,16,13,12,20)')
+    df = df.query('COD_ETAPA in (1,2,3,4,10,15,16,12,20)')
     
     tota_prod = {'COD_ETAPA':30 ,'ETAPA':'OS em produção', 'LOJA': soma_OS, 'Mov_at' :soma_OS_td}
     df_tota_prod = pd.DataFrame([tota_prod])
@@ -83,7 +83,7 @@ def agrupamento_etapa(df):
 
     return df
 
-
+@st.cache_data()
 def OS_atrasadas(df):
     #pegando tudo que nao é Translado laboratório -> loja
     df =  df[~df['COD_ETAPA'].isin([4, 20, 7,14])] 
@@ -110,8 +110,8 @@ def OS_atrasadas(df):
 
     return df
 
-
-def OS_Produzidas(df):    
+@st.cache_data()
+def OS_Produzidas(df,days_pass,today):    
 
     #pegando tudo que é Translado laboratório -> loja
     df = df[df['COD_ETAPA']== 4]
@@ -126,14 +126,9 @@ def OS_Produzidas(df):
     df = df.drop(columns='index')
     return df
 
-df_OSAtrasadas = OS_atrasadas(df) 
-df_Producao = OS_Produzidas(df)
-df_Etapas = agrupamento_etapa(df)
+ 
 
 
-unique_cod_etapas = df_Etapas['COD_ETAPA'].unique()
 
-Os_Semana = df_Producao[df_Producao['Dia'].isin(days_only)]['QTD OS'].sum()
-OS_Dia = df_Producao[df_Producao['Dia']==day_today]['QTD OS'].sum()
-Os_Mes = df_Producao['QTD OS'].sum()
-Ag_montagem = df_Etapas[df_Etapas['COD_ETAPA']==16]['LOJA'].sum()
+
+
