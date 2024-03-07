@@ -69,7 +69,8 @@ def app():
 
     st.set_page_config(
         page_title="Painel de produção Laboratório",
-        page_icon= "Logo_DI.png"
+        page_icon= "Logo_DI.png",
+        initial_sidebar_state='collapsed'
     )
     apply_css(css)
 
