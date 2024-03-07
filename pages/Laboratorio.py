@@ -66,41 +66,37 @@ def apply_css(css):
    st.markdown(css, unsafe_allow_html=True)
 
 def app(): 
-
+    #configuração da pagina
     st.set_page_config(
         page_title="Painel de produção Laboratório",
         page_icon= "Logo_DI.png",
         initial_sidebar_state='collapsed'
     )
+    #aplicando o css
     apply_css(css)
+    st.title("Painel de produção")
+    #Variaveis tempo
 
     today = dt.datetime.today()
     max_dt = today.date()
-
     first_day_month = (today.replace(day=1)).date()
-
     days_pass = (today - dt.timedelta(days=31) )
-
     start_of_week = today - dt.timedelta(days=today.weekday())
-
     week_days = [start_of_week + dt.timedelta(days=i) for i in range(7)]
-
     days_only = [day.strftime('%d') for day in week_days]
     day_today = max_dt.strftime('%d')
 
-    #consultas
+    #Puxando os dados
     df= consulta()
     df_Etapas = agrupamento_etapa(df,first_day_month,today,max_dt)
     df_OSAtrasadas = OS_atrasadas(df)
     df_Producao = OS_Produzidas(df,days_pass,today)
 
+    #Metricas de etapas especificas
     Os_Semana = df_Producao[df_Producao['Dia'].isin(days_only)]['QTD OS'].sum()
     OS_Dia = df_Producao[df_Producao['Dia']==day_today]['QTD OS'].sum()
     Os_Mes = df_Producao['QTD OS'].sum()
     Ag_montagem = df_Etapas[df_Etapas['COD_ETAPA']==16]['LOJA'].sum()
-
-    st.title("Painel de produção")
-
 
     col1, col2, col3, col4  = st.columns(4)
 
@@ -109,8 +105,8 @@ def app():
     col3.metric(label='OS do mes', value=Os_Mes, delta=None)
     col4.metric(label='Aguardando montagem', value=Ag_montagem, delta=None)
 
+    #Tabela puxando tudo que esteja 'Em montagem'
     df_OSAt= df_OSAtrasadas[df_OSAtrasadas['COD_ETAPA']==2].drop(columns=['COD_ETAPA'])
-
 
     st.dataframe(
     data=df_OSAt,

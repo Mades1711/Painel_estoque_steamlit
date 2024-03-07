@@ -68,30 +68,32 @@ def apply_css(css):
    st.markdown(css, unsafe_allow_html=True)
 
 def app():
-
+    #configuração da pagina
     st.set_page_config(
         page_title="Painel de produção Estoque",
         page_icon= "Logo_DI.png",
         initial_sidebar_state='collapsed'
     )
-    #Manipulação temporal
+    #Variaveis tempo
     today = dt.datetime.today()
     max_dt = today.date()
     first_day_month = (today.replace(day=1)).date()
     days_pass = (today - dt.timedelta(days=31) )
 
-    #consultas
+    #Puxando os dados
     df= consulta()
     df_Etapas = agrupamento_etapa(df,first_day_month,today,max_dt)
     df_OSAtrasadas = OS_atrasadas(df)
     df_Producao = OS_Produzidas(df,days_pass,today)
 
-    #variaveis
+    #Etapas unicas
     unique_cod_etapas = df_Etapas['COD_ETAPA'].unique()
 
+    #aplicando o css
     apply_css(css)
     st.title("Painel de produção")
 
+    #metricas por etapa
     metrics_per_row = 5
 
     for i in range(0, len(unique_cod_etapas), metrics_per_row):
@@ -112,6 +114,7 @@ def app():
 
     col1,col2  = st.columns(2)
 
+    #Grafico de barras
     col1.altair_chart(
         alt.Chart(df_Producao).mark_bar().encode(
             x=alt.X('Dia', sort=None, title="Dia"),
@@ -121,7 +124,7 @@ def app():
         use_container_width=True,    
     )
 
-
+    #tabela
     col2.dataframe(
         data=df_OSAtrasadas.drop(columns=['COD_ETAPA']),
         hide_index= True,
