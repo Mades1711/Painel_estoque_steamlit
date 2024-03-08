@@ -4,10 +4,12 @@ with
 L_status as (
 select distinct
     ordemservicocaixalog.cod_ordemservicocaixa,
-    max(ordemservicocaixalog.datahoraentrada) u_mov
+    max(ordemservicocaixalog.datahoraentrada) u_mov,
+    max(ordemservicocaixalog.cod_ordemservicocaixalog) u_log
 from ordemservicocaixalog
 WHERE
-ordemservicocaixalog.cod_etapa not in (0,8,9,6,5)
+ordemservicocaixalog.cod_etapa not in (0,8,9,6)
+--and ordemservicocaixalog.cod_ordemservicocaixa = 6183
 
 group by cod_ordemservicocaixa
 
@@ -34,15 +36,15 @@ select
     case ordemservicocaixalog.cod_etapa
         when 00 then 'Etapa inicial'
         when 01 then 'Ordem de serviço no estoque'
-        when 02 then 'Em montagem'
-        when 03 then 'Ordem de serviço no laboratório'
+        when 02 then 'Translado estoque -> laboratório'
+        when 03 then 'Em montagem'
         when 04 then 'Translado laboratório -> loja'
         when 05 then 'Ordem de serviço recebida do laboratório'
         when 06 then 'Venda concluída e serviço na loja'
         when 07 then 'Translado loja (pós venda) -> estoque'
         when 08 then 'Ordem de serviço entregue ao cliente'
         when 09 then 'Ordem de serviço cancelada'
-        when 10 then 'Aguardando compra de lentes'
+        when 10 then 'Compra realizada'
         when 11 then 'O.S. devolvida para tratamento'
         when 12 then 'O.S. em tratamento externo'
         when 13 then 'O.S. devolvida pelo cliente'

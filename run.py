@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
-from st_pages import Page, show_pages, add_page_title
+from st_pages import Page, show_pages
 
 
 refresh_count = st_autorefresh(interval=10 * 60 * 1000, key="mainrefresh", limit=None)
@@ -8,6 +8,7 @@ refresh_count = st_autorefresh(interval=10 * 60 * 1000, key="mainrefresh", limit
 
 
 def run():
+
     show_pages(
         [
             Page("./pages/Estoque.py", "Estoque", "📦"),

@@ -12,21 +12,26 @@ warnings.filterwarnings('ignore')
 
 locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
 
+#Manipulação temporal
 
-#Variaveis tempo
 today = dt.datetime.today()
 max_dt = today.date()
 next_month = today.replace(day=28) + dt.timedelta(days=4)
+
 first_day_month = (today.replace(day=1)).date()
 final_month = (next_month - dt.timedelta(days=next_month.day))
+
 days_pass = (today - dt.timedelta(days=31) )
+
 start_of_week = today - dt.timedelta(days=today.weekday())
+
 week_days = [start_of_week + dt.timedelta(days=i) for i in range(7)]
+
 days_only = [day.strftime('%d') for day in week_days]
 day_today = max_dt.strftime('%d')
 
 
-#conexão
+
 def Connect():
   conn =fdb.connect(
       host=config('host'), 
@@ -37,17 +42,14 @@ def Connect():
 
   return conn
 
-#lendo os dados e armazenando em cache
 @st.cache_data(show_spinner="Atualizando os dados...")
 def consulta():
     df= pd.read_sql(Mov_dia, Connect())
     return df
 
 
-#manipulando a consulta
 @st.cache_data()
 def agrupamento_etapa(df, first_day_month, today, max_dt):
-    #pegando as OS que estão 'Translado laboratório -> loja' do mes
     df_prod = df[df['COD_ETAPA']== 4] 
     df_prod['Ultima mov'] = pd.to_datetime(df_prod['Ultima mov']) 
     df_prod['Ultima mov'] = df_prod['Ultima mov'].dt.date
@@ -55,23 +57,18 @@ def agrupamento_etapa(df, first_day_month, today, max_dt):
     df_prod['Mov_at'] = df_prod['Mov_at'] == df_prod['Ultima mov']
     df_prod = df_prod[df_prod['Ultima mov'].between(first_day_month, today.date())]   
     df_prod= df_prod.groupby(['COD_ETAPA','ETAPA']).agg({'LOJA':'count','Mov_at':'sum'}).reset_index()
-
-    #pegando as OS que não estão 'Translado laboratório -> loja' no total
     df = df[df['COD_ETAPA']!= 4] 
     df['Ultima mov'] = pd.to_datetime(df['Ultima mov'])
-    df['Ultima mov'] = df['Ultima mov'].dt.date   
+    df['Ultima mov'] = df['Ultima mov'].dt.date
+    
     df['Mov_at'] = df['Ultima mov']== max_dt    
     df= df.groupby(['COD_ETAPA','ETAPA']).agg({'LOJA':'count','Mov_at':'sum'}).reset_index()   
-    soma_OS = df['LOJA'].sum()
-    soma_OS_td = df['Mov_at'].sum()
-    
-    #concatenando os dataframes
     df = pd.concat([df, df_prod], ignore_index= True) 
+    df = df.query('COD_ETAPA in (1,3,4,10,15,12,20)')
 
-    #pegando etapas especificas
-    df = df.query('COD_ETAPA in (1,2,3,4,10,15,16,12,20)')
-    
-    #soma das OS que estaão em produção
+    soma_OS = df['LOJA'].sum()
+    soma_OS_td = df['Mov_at'].sum() 
+
     tota_prod = {'COD_ETAPA':30 ,'ETAPA':'OS em produção', 'LOJA': soma_OS, 'Mov_at' :soma_OS_td}
     df_tota_prod = pd.DataFrame([tota_prod])
     df = pd.concat([df,df_tota_prod], ignore_index= True)
@@ -79,8 +76,7 @@ def agrupamento_etapa(df, first_day_month, today, max_dt):
     df['LOJA'] = df['LOJA'].astype(str)
     df['Mov_at'] = df['Mov_at'].astype(str)
     
-    #ordenando o index das etapas
-    ordem_index = [1,10,2,3,12,15,16,20,13,4,30]
+    ordem_index = [1, 10, 12, 3, 15, 20, 13, 4, 30]
     df['Ordem'] = df['COD_ETAPA'].map(lambda x: ordem_index.index(x))
     df = df.sort_values('Ordem').drop('Ordem', axis=1)
 
@@ -89,7 +85,7 @@ def agrupamento_etapa(df, first_day_month, today, max_dt):
 @st.cache_data()
 def OS_atrasadas(df):
     #pegando tudo que nao é Translado laboratório -> loja
-    df =  df[~df['COD_ETAPA'].isin([4, 20, 7, 14])] 
+    df =  df[~df['COD_ETAPA'].isin([4, 20, 7,14,5])] 
     
     df['PREVISAO'] = pd.to_datetime(df['PREVISAO'])
     df['Ultima mov'] = pd.to_datetime(df['Ultima mov'])
@@ -109,7 +105,7 @@ def OS_atrasadas(df):
     df['Ultima mov']= df['Ultima mov'].dt.strftime('%d/%m/%y')
     df = df.sort_values(by = ['Dias Atrasados'], ascending= False )
     df = pd.concat([df,df_semdt])
-    df = df.drop(columns=['Hoje'])
+    df = df.drop(columns=['Hoje'])#'COD_ETAPA',
 
     return df
 
@@ -130,8 +126,3 @@ def OS_Produzidas(df,days_pass,today):
     return df
 
  
-
-
-
-
-

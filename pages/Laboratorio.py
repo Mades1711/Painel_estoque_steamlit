@@ -1,6 +1,7 @@
 import streamlit as st
 from datam import consulta, agrupamento_etapa, OS_atrasadas, OS_Produzidas
 import datetime as dt
+from streamlit_autorefresh import st_autorefresh
 
 css = """
 <style>
@@ -65,13 +66,17 @@ padding: 0px;
 def apply_css(css):  
    st.markdown(css, unsafe_allow_html=True)
 
-def app(): 
-    #configuração da pagina
-    st.set_page_config(
+st.set_page_config(
         page_title="Painel de produção Laboratório",
         page_icon= "Logo_DI.png",
         initial_sidebar_state='collapsed'
     )
+
+
+def app():
+    refresh_count = st_autorefresh(interval=10 * 60 * 1000, key="mainrefresh", limit=None) 
+    #configuração da pagina
+
     #aplicando o css
     apply_css(css)
     st.title("Painel de produção")
