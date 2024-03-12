@@ -74,7 +74,7 @@ st.set_page_config(
 
 
 def app():
-    refresh_count = st_autorefresh(interval=10 * 60 * 1000, key="mainrefresh", limit=None) 
+    refresh_count = st_autorefresh(interval=1 * 60 * 1000, key="mainrefresh", limit=None) 
     #configuração da pagina
 
     #aplicando o css
