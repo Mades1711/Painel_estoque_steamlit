@@ -75,7 +75,7 @@ st.set_page_config(
 
 def app():
     refresh_count = st_autorefresh(interval=10 * 60 * 1000, key="mainrefresh", limit=None)
-
+    
 
 
     #Manipulação temporal
@@ -83,7 +83,7 @@ def app():
     max_dt = today.date()
     first_day_month = (today.replace(day=1)).date()
     days_pass = (today - dt.timedelta(days=31) )
-
+    print('atualizado', today)
     #consultas
     df= consulta()
     df_Etapas = agrupamento_etapa(df,first_day_month,today,max_dt)
