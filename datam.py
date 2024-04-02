@@ -42,13 +42,13 @@ def Connect():
 
   return conn
 
-@st.cache_data(show_spinner="Atualizando os dados...")
+@st.cache_data(show_spinner="Atualizando os dados...",ttl='10m')
 def consulta():
     df= pd.read_sql(Mov_dia, Connect())
     return df
 
 
-@st.cache_data()
+#@st.cache_data()
 def agrupamento_etapa(df, first_day_month, today, max_dt):
     df_prod = df[df['COD_ETAPA']== 4] 
     df_prod['Ultima mov'] = pd.to_datetime(df_prod['Ultima mov']) 
@@ -82,7 +82,7 @@ def agrupamento_etapa(df, first_day_month, today, max_dt):
 
     return df
 
-@st.cache_data()
+#@st.cache_data()
 def OS_atrasadas(df):
     #pegando tudo que nao é Translado laboratório -> loja
     df =  df[~df['COD_ETAPA'].isin([4, 20, 7,14,5])] 
@@ -109,7 +109,7 @@ def OS_atrasadas(df):
 
     return df
 
-@st.cache_data()
+#@st.cache_data()
 def OS_Produzidas(df,days_pass,today):    
 
     #pegando tudo que é Translado laboratório -> loja

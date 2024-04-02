@@ -30,6 +30,7 @@ select
         when  15 then '15'
         when  16 then '07'
         when  17 then '30'
+        when  21 then '03'
         end as "LOJA",
     L_status.cod_ordemservicocaixa OS ,
     ordemservicocaixalog.cod_etapa COD_ETAPA,

@@ -74,28 +74,27 @@ st.set_page_config(
     )
 
 def app():
-    refresh_count = st_autorefresh(interval=10 * 60 * 1000, key="mainrefresh", limit=None)
+
+    refresh_count = st_autorefresh(interval=11 * 60 * 1000, key="mainrefresh", limit=None)
     
-
-
     #Manipulação temporal
     today = dt.datetime.today()
+       
     max_dt = today.date()
     first_day_month = (today.replace(day=1)).date()
     days_pass = (today - dt.timedelta(days=31) )
-    print('atualizado', today)
-    #consultas
-    df= consulta()
+ 
+    df = consulta()
     df_Etapas = agrupamento_etapa(df,first_day_month,today,max_dt)
     df_OSAtrasadas = OS_atrasadas(df)
     df_Producao = OS_Produzidas(df,days_pass,today)
 
+
     #variaveis
     unique_cod_etapas = df_Etapas['COD_ETAPA'].unique()
 
-    apply_css(css)
+    apply_css(css) 
     st.title("Painel de produção")
-    
     # Definindo o número de métricas (colunas) por linha
     metrics_first_row = 5
     metrics_subsequent_row = 3
@@ -154,5 +153,8 @@ def app():
         width= 850,
         height= 250,
         )
+    
+
+    
     
 app()
