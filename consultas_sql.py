@@ -8,7 +8,7 @@ select distinct
     max(ordemservicocaixalog.cod_ordemservicocaixalog) u_log
 from ordemservicocaixalog
 WHERE
-ordemservicocaixalog.cod_etapa not in (0,8,9,6)
+ordemservicocaixalog.cod_etapa not in (0,8,9,6,5)
 --and ordemservicocaixalog.cod_ordemservicocaixa = 6183
 
 group by cod_ordemservicocaixa
