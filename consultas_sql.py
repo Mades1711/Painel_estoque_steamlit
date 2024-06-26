@@ -9,29 +9,11 @@ select distinct
 from ordemservicocaixalog
 WHERE
 ordemservicocaixalog.cod_etapa not in (0,8,9,6,5)
---and ordemservicocaixalog.cod_ordemservicocaixa = 6183
-
 group by cod_ordemservicocaixa
 
 )
 select
-    case  ordemservicocaixa.cod_empresa
-        when  01 then '01'
-        when  04 then '02'
-        when  06 then '08'
-        when  07 then '05'
-        when  08 then '06'
-        when  09 then '09'
-        when  10 then '10'
-        when  11 then '11'
-        when  12 then '13'
-        when  13 then '12'
-        when  14 then '14'
-        when  15 then '15'
-        when  16 then '07'
-        when  17 then '30'
-        when  21 then '03'
-        end as "LOJA",
+    L.NOME as "LOJA",
     L_status.cod_ordemservicocaixa OS ,
     ordemservicocaixalog.cod_etapa COD_ETAPA,
     case ordemservicocaixalog.cod_etapa
@@ -70,10 +52,61 @@ join ordemservicocaixa
 
 left join transacao
     on transacao.cod_transacao = ordemservicocaixa.cod_transacao and transacao.cod_empresa = ordemservicocaixa.cod_empresa
-
+JOIN PESSOA L
+    ON L.COD_PESSOA = ordemservicocaixa.cod_EMPRESA
 where
     (ordemservicocaixa.cod_empresa is not null and  ordemservicocaixa.reparo = 'F')
     and ordemservicocaixalog.observacao not like ('%Cancelamento%')
 """
 
 
+entradas_fiscais = """
+WITH
+TIPOS_ENTRADAS AS (
+	SELECT 
+		U.NOME,
+		T.NUMEROTRANSACAO,
+		T.DATAINCLUSAO,
+		CASE 
+			WHEN TP.TIPO IN ('AR', 'OC') THEN 'ARMACOES'
+			WHEN TP.TIPO = 'LG' THEN 'LENTES'
+		END TIPO
+	FROM ENTRADA e 
+	JOIN TRANSACAO t 
+	ON t.COD_TRANSACAO  = e.COD_ENTRADA 
+	JOIN PESSOA F
+		ON F.COD_PESSOA  = t.COD_PESSOA  AND f.PESSOAFORNECEDOR = 'T'
+	JOIN PESSOA l
+		ON l.COD_PESSOA  = t.COD_EMPRESA 
+	JOIN USUARIO u 
+		ON U.COD_USUARIO = T.COD_USUARIO
+	LEFT JOIN TRANSACAO_ITEM ti 
+		ON TI.COD_TRANSACAO = T.COD_TRANSACAO 
+	LEFT JOIN TABELA_PRODUTO tp 
+		ON TP.COD_PRODUTO  = TI.COD_ITEM 	
+	WHERE 
+	T.DATAINCLUSAO BETWEEN '{datainit}' and '{datafin}'
+	AND U.COD_GRUPOUSUARIO = 3
+	AND T.TIPOTRANSACAO = 'ENF'
+	AND TP.TIPO IN ('AR', 'OC', 'LG')
+	GROUP BY 
+		U.NOME,
+		T.NUMEROTRANSACAO,
+		T.DATAINCLUSAO,
+		CASE 
+			WHEN TP.TIPO IN ('AR', 'OC') THEN 'ARMACOES'
+			WHEN TP.TIPO = 'LG' THEN 'LENTES'
+		END
+)
+SELECT 
+    TE.NOME,
+    TE.DATAINCLUSAO,
+    TE.TIPO,
+    COUNT(TE.NUMEROTRANSACAO) QUANTIDADE
+FROM TIPOS_ENTRADAS TE
+GROUP BY 
+    TE.NOME,
+    TE.DATAINCLUSAO,
+    TE.TIPO
+
+"""

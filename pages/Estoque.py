@@ -1,8 +1,9 @@
 import streamlit as st
 import altair as alt
-from datam import consulta, agrupamento_etapa, OS_atrasadas, OS_Produzidas
+from datam import consulta, agrupamento_etapa, OS_atrasadas, OS_Produzidas, consulta_entradas
 import datetime as dt
 from streamlit_autorefresh import st_autorefresh
+import pandas as pd
 
 
 css = """
@@ -60,8 +61,6 @@ padding: 0px;
    }
 
 
-
-
 </style>
 """
 def apply_css(css):
@@ -88,7 +87,9 @@ def app():
     df_Etapas = agrupamento_etapa(df,first_day_month,today,max_dt)
     df_OSAtrasadas = OS_atrasadas(df)
     df_Producao = OS_Produzidas(df,days_pass,today)
-
+    df_entradas  = consulta_entradas(first_day_month,max_dt)
+    df_Etapas = pd.concat([df_Etapas,df_entradas])
+    
 
     #variaveis
     unique_cod_etapas = df_Etapas['COD_ETAPA'].unique()
@@ -97,13 +98,14 @@ def app():
     st.title("Painel de produção")
     # Definindo o número de métricas (colunas) por linha
     metrics_first_row = 5
-    metrics_subsequent_row = 3
+    metrics_subsequent_row = 5
 
     # Total de itens para iterar
     total_items = len(unique_cod_etapas)
 
     # Inicializando o contador de linhas
     row_counter = 0
+
 
     i = 0
     while i < total_items:

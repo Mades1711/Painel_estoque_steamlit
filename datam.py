@@ -5,7 +5,7 @@ import warnings
 from decouple import config
 import datetime as dt
 import locale
-from consultas_sql import Mov_dia
+from consultas_sql import Mov_dia, entradas_fiscais
 
 
 warnings.filterwarnings('ignore')
@@ -39,14 +39,39 @@ def Connect():
       user=config('user'), 
       password=config('password')
     )
-
   return conn
 
 @st.cache_data(show_spinner="Atualizando os dados...",ttl='10m')
 def consulta():
-    df= pd.read_sql(Mov_dia, Connect())
+    conn = Connect()
+    cursor = conn.cursor()
+    df= pd.read_sql(Mov_dia, conn)
+
+    cursor.close()
+    conn.close()
     return df
 
+@st.cache_data(show_spinner="Atualizando os dados...",ttl='10m')
+def consulta_entradas(first_day_month,max_dt):
+  
+    conn = Connect()
+    cursor = conn.cursor()
+    df= pd.read_sql(entradas_fiscais.format(datainit = first_day_month, datafin = max_dt), conn)
+
+    cursor.close()
+    conn.close()
+    
+    df['DATAINCLUSAO'] = pd.to_datetime(df['DATAINCLUSAO'])
+    df['COUNT_DATA_ATUAL'] = df.apply(lambda row: row['QUANTIDADE'] if row['DATAINCLUSAO'].date() == today else 0, axis=1)
+    df = df.groupby(['TIPO']).agg({'QUANTIDADE': 'sum', 'COUNT_DATA_ATUAL': 'sum'}).reset_index()
+    df['COD_ETAPA'] = [31, 32]
+    df = df[['COD_ETAPA', 'TIPO', 'QUANTIDADE', 'COUNT_DATA_ATUAL']]
+    df = df.rename(columns ={
+                            'TIPO':'ETAPA', 
+                            'QUANTIDADE':'LOJA',
+                            'COUNT_DATA_ATUAL':'Mov_at'
+                            })
+    return df
 
 #@st.cache_data()
 def agrupamento_etapa(df, first_day_month, today, max_dt):
