@@ -46,17 +46,13 @@ from L_status
 
 join ordemservicocaixalog
     on (ordemservicocaixalog.cod_ordemservicocaixa = L_status.cod_ordemservicocaixa  and L_status.u_mov  = ordemservicocaixalog.datahoraentrada)
-
 join ordemservicocaixa 
     on (ordemservicocaixalog.cod_ordemservicocaixa = ordemservicocaixa.cod_ordemservicocaixa and ordemservicocaixa.cod_clientereceita is not null)
-
-left join transacao
-    on transacao.cod_transacao = ordemservicocaixa.cod_transacao and transacao.cod_empresa = ordemservicocaixa.cod_empresa
-JOIN PESSOA L
-    ON L.COD_PESSOA = ordemservicocaixa.cod_EMPRESA
+LEFT JOIN PESSOA L
+    ON L.COD_PESSOA = ordemservicocaixa.COD_EMPRESAORIGEM 
 where
-    (ordemservicocaixa.cod_empresa is not null and  ordemservicocaixa.reparo = 'F')
-    and ordemservicocaixalog.observacao not like ('%Cancelamento%')
+    --(ordemservicocaixa.cod_empresa is not null)
+     ordemservicocaixalog.observacao not like ('%Cancelamento%')
 """
 
 
@@ -68,8 +64,8 @@ TIPOS_ENTRADAS AS (
 		T.NUMEROTRANSACAO,
 		T.DATAINCLUSAO,
 		CASE 
-			WHEN TP.TIPO IN ('AR', 'OC') THEN 'ARMACOES'
-			WHEN TP.TIPO = 'LG' THEN 'LENTES'
+			WHEN TP.TIPO IN ('AR', 'OC') THEN 'NF ARMACOES'
+			WHEN TP.TIPO = 'LG' THEN 'NF LENTES'
 		END TIPO
 	FROM ENTRADA e 
 	JOIN TRANSACAO t 
@@ -94,8 +90,8 @@ TIPOS_ENTRADAS AS (
 		T.NUMEROTRANSACAO,
 		T.DATAINCLUSAO,
 		CASE 
-			WHEN TP.TIPO IN ('AR', 'OC') THEN 'ARMACOES'
-			WHEN TP.TIPO = 'LG' THEN 'LENTES'
+			WHEN TP.TIPO IN ('AR', 'OC') THEN 'NF ARMACOES'
+			WHEN TP.TIPO = 'LG' THEN 'NF LENTES'
 		END
 )
 SELECT 

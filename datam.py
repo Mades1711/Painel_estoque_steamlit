@@ -53,7 +53,7 @@ def consulta():
 
 @st.cache_data(show_spinner="Atualizando os dados...",ttl='10m')
 def consulta_entradas(first_day_month,max_dt):
-  
+    
     conn = Connect()
     cursor = conn.cursor()
     df= pd.read_sql(entradas_fiscais.format(datainit = first_day_month, datafin = max_dt), conn)
@@ -62,7 +62,8 @@ def consulta_entradas(first_day_month,max_dt):
     conn.close()
     
     df['DATAINCLUSAO'] = pd.to_datetime(df['DATAINCLUSAO'])
-    df['COUNT_DATA_ATUAL'] = df.apply(lambda row: row['QUANTIDADE'] if row['DATAINCLUSAO'].date() == today else 0, axis=1)
+    df['COUNT_DATA_ATUAL'] = df.apply(lambda row: row['QUANTIDADE'] if row['DATAINCLUSAO'].date() == max_dt else 0, axis=1)
+
     df = df.groupby(['TIPO']).agg({'QUANTIDADE': 'sum', 'COUNT_DATA_ATUAL': 'sum'}).reset_index()
     df['COD_ETAPA'] = [31, 32]
     df = df[['COD_ETAPA', 'TIPO', 'QUANTIDADE', 'COUNT_DATA_ATUAL']]
