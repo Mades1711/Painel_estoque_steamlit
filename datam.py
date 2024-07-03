@@ -68,7 +68,8 @@ def consulta_entradas(first_day_month,max_dt):
         df['COUNT_DATA_ATUAL'] = df.apply(lambda row: row['QUANTIDADE'] if row['DATAINCLUSAO'].date() == max_dt else 0, axis=1)
 
         df = df.groupby(['TIPO']).agg({'QUANTIDADE': 'sum', 'COUNT_DATA_ATUAL': 'sum'}).reset_index()
-        df['COD_ETAPA'] = [31, 32]
+
+        df['COD_ETAPA'] = range(30, 30 + len(df))
         df = df[['COD_ETAPA', 'TIPO', 'QUANTIDADE', 'COUNT_DATA_ATUAL']]
         df = df.rename(columns ={
                                 'TIPO':'ETAPA', 
