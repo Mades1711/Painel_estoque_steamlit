@@ -57,22 +57,25 @@ def consulta_entradas(first_day_month,max_dt):
     conn = Connect()
     cursor = conn.cursor()
     df= pd.read_sql(entradas_fiscais.format(datainit = first_day_month, datafin = max_dt), conn)
-
+    
     cursor.close()
     conn.close()
-    
-    df['DATAINCLUSAO'] = pd.to_datetime(df['DATAINCLUSAO'])
-    df['COUNT_DATA_ATUAL'] = df.apply(lambda row: row['QUANTIDADE'] if row['DATAINCLUSAO'].date() == max_dt else 0, axis=1)
+    if df.empty:
+        return None
+    else:
+        df['DATAINCLUSAO'] = pd.to_datetime(df['DATAINCLUSAO'])
+        
+        df['COUNT_DATA_ATUAL'] = df.apply(lambda row: row['QUANTIDADE'] if row['DATAINCLUSAO'].date() == max_dt else 0, axis=1)
 
-    df = df.groupby(['TIPO']).agg({'QUANTIDADE': 'sum', 'COUNT_DATA_ATUAL': 'sum'}).reset_index()
-    df['COD_ETAPA'] = [31, 32]
-    df = df[['COD_ETAPA', 'TIPO', 'QUANTIDADE', 'COUNT_DATA_ATUAL']]
-    df = df.rename(columns ={
-                            'TIPO':'ETAPA', 
-                            'QUANTIDADE':'LOJA',
-                            'COUNT_DATA_ATUAL':'Mov_at'
-                            })
-    return df
+        df = df.groupby(['TIPO']).agg({'QUANTIDADE': 'sum', 'COUNT_DATA_ATUAL': 'sum'}).reset_index()
+        df['COD_ETAPA'] = [31, 32]
+        df = df[['COD_ETAPA', 'TIPO', 'QUANTIDADE', 'COUNT_DATA_ATUAL']]
+        df = df.rename(columns ={
+                                'TIPO':'ETAPA', 
+                                'QUANTIDADE':'LOJA',
+                                'COUNT_DATA_ATUAL':'Mov_at'
+                                })
+        return df
 
 #@st.cache_data()
 def agrupamento_etapa(df, first_day_month, today, max_dt):
