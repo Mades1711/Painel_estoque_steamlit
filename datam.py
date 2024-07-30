@@ -81,17 +81,17 @@ def consulta_entradas(first_day_month,max_dt):
 #@st.cache_data()
 def agrupamento_etapa(df, first_day_month, today, max_dt):
     df_prod = df[df['COD_ETAPA']== 4] 
-    df_prod['Ultima mov'] = pd.to_datetime(df_prod['Ultima mov']) 
-    df_prod['Ultima mov'] = df_prod['Ultima mov'].dt.date
+    df_prod['ULTIMA_MOV'] = pd.to_datetime(df_prod['ULTIMA_MOV']) 
+    df_prod['ULTIMA_MOV'] = df_prod['ULTIMA_MOV'].dt.date
     df_prod['Mov_at'] = max_dt
-    df_prod['Mov_at'] = df_prod['Mov_at'] == df_prod['Ultima mov']
-    df_prod = df_prod[df_prod['Ultima mov'].between(first_day_month, today.date())]   
+    df_prod['Mov_at'] = df_prod['Mov_at'] == df_prod['ULTIMA_MOV']
+    df_prod = df_prod[df_prod['ULTIMA_MOV'].between(first_day_month, today.date())]   
     df_prod= df_prod.groupby(['COD_ETAPA','ETAPA']).agg({'LOJA':'count','Mov_at':'sum'}).reset_index()
     df = df[df['COD_ETAPA']!= 4] 
-    df['Ultima mov'] = pd.to_datetime(df['Ultima mov'])
-    df['Ultima mov'] = df['Ultima mov'].dt.date
+    df['ULTIMA_MOV'] = pd.to_datetime(df['ULTIMA_MOV'])
+    df['ULTIMA_MOV'] = df['ULTIMA_MOV'].dt.date
     
-    df['Mov_at'] = df['Ultima mov']== max_dt    
+    df['Mov_at'] = df['ULTIMA_MOV']== max_dt    
     df= df.groupby(['COD_ETAPA','ETAPA']).agg({'LOJA':'count','Mov_at':'sum'}).reset_index()   
     df = pd.concat([df, df_prod], ignore_index= True) 
     df = df.query('COD_ETAPA in (1,3,4,10,15,12,20)')
@@ -118,12 +118,12 @@ def OS_atrasadas(df):
     df =  df[~df['COD_ETAPA'].isin([4, 20, 7,14,5])] 
     
     df['PREVISAO'] = pd.to_datetime(df['PREVISAO'])
-    df['Ultima mov'] = pd.to_datetime(df['Ultima mov'])
+    df['ULTIMA_MOV'] = pd.to_datetime(df['ULTIMA_MOV'])
 
     #separando OS sem data de previsão
     df_semdt = df.fillna({'PREVISAO': 'SEM DATA DE PREVISÃO'})
     df_semdt = df_semdt.query("PREVISAO == 'SEM DATA DE PREVISÃO'")  
-    df_semdt['Ultima mov'] = df_semdt['Ultima mov'].dt.strftime('%d/%m/%y')
+    df_semdt['ULTIMA_MOV'] = df_semdt['ULTIMA_MOV'].dt.strftime('%d/%m/%y')
 
     #pegando tudo que está atrasado
     df = df.query("PREVISAO.notnull()")  
@@ -132,7 +132,7 @@ def OS_atrasadas(df):
     df = df[df['Dias Atrasados']<0] 
     df['Dias Atrasados'] = df['Dias Atrasados'].abs()
     df['PREVISAO']= df['PREVISAO'].dt.strftime('%d/%m/%y')
-    df['Ultima mov']= df['Ultima mov'].dt.strftime('%d/%m/%y')
+    df['ULTIMA_MOV']= df['ULTIMA_MOV'].dt.strftime('%d/%m/%y')
     df = df.sort_values(by = ['Dias Atrasados'], ascending= False )
     df = pd.concat([df,df_semdt])
     df = df.drop(columns=['Hoje'])#'COD_ETAPA',
@@ -145,13 +145,13 @@ def OS_Produzidas(df,days_pass,today):
     #pegando tudo que é Translado laboratório -> loja
     df = df[df['COD_ETAPA']== 4]
     df = df.drop(columns=['PREVISAO','COD_ETAPA'])
-    df['Ultima mov'] = pd.to_datetime(df['Ultima mov'])
-    df = df[df['Ultima mov'].between(days_pass, today)]    
-    df['Dia']= df['Ultima mov'].dt.strftime('%b %d')
-    df= df.groupby(['Dia','Ultima mov']).agg({'LOJA':'count'}).reset_index()
+    df['ULTIMA_MOV'] = pd.to_datetime(df['ULTIMA_MOV'])
+    df = df[df['ULTIMA_MOV'].between(days_pass, today)]    
+    df['Dia']= df['ULTIMA_MOV'].dt.strftime('%b %d')
+    df= df.groupby(['Dia','ULTIMA_MOV']).agg({'LOJA':'count'}).reset_index()
     df = df.reset_index()
-    df = df.rename(columns={ 'LOJA' : 'QTD OS'}).sort_values(by='Ultima mov',ascending=True)
-    df = df.set_index('Ultima mov').reset_index()
+    df = df.rename(columns={ 'LOJA' : 'QTD OS'}).sort_values(by='ULTIMA_MOV',ascending=True)
+    df = df.set_index('ULTIMA_MOV').reset_index()
     df = df.drop(columns='index')
     return df
 
