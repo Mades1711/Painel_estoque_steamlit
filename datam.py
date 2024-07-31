@@ -38,7 +38,7 @@ def Connect():
       database=config('database'),
       user=config('user'), 
       password=config('password'),
-      charset = 'WIN1252'
+      charset = 'utf-8'
     )
   return conn
 
