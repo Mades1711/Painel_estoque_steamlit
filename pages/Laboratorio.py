@@ -101,7 +101,6 @@ def app():
     df_OSAtrasadas = OS_atrasadas(df)
     df_Producao = OS_Produzidas(df,days_pass,today)
 
-    print(df_Etapas)
 
     #Metricas de etapas especificas
     Os_Semana = df_Producao[df_Producao['Dia'].isin(days_only)]['QTD OS'].sum()
