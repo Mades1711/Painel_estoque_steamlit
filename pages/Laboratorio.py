@@ -101,10 +101,12 @@ def app():
     df_OSAtrasadas = OS_atrasadas(df)
     df_Producao = OS_Produzidas(df,days_pass,today)
 
+    print(df_Etapas)
+
     #Metricas de etapas especificas
     Os_Semana = df_Producao[df_Producao['Dia'].isin(days_only)]['QTD OS'].sum()
-    OS_Dia = df_Producao[df_Producao['Dia']==day_today]['QTD OS'].sum()
-    Os_Mes = df_Etapas.loc[df_Etapas['COD_ETAPA'] == 30, 'LOJA'].iloc[0]
+    OS_Dia = df_Etapas[df_Etapas['COD_ETAPA']==4]['Mov_at'].sum()
+    Os_Mes = df_Etapas[df_Etapas['COD_ETAPA']==4]['LOJA'].sum()
     Ag_montagem = df_Etapas[df_Etapas['COD_ETAPA']==15]['LOJA'].sum()
     Ag_montagems = df_Etapas[df_Etapas['COD_ETAPA']==5]['Mov_at'].sum()
 
